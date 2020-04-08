@@ -9,7 +9,7 @@ cache: npm
 
 branches:
   only:
-    - master
+    - blog
 
 before_install:
   - npm install -g hexo
