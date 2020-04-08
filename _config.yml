@@ -95,10 +95,9 @@ ignore:
 ## Themes: https://hexo.io/themes/
 theme: hacker
 
-
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
-# deploy:
-#   type: git
-#   repository: https://github.com/ihuanglei/ihuanglei.github.com.git
-#   branch: master
+deploy:
+  type: git
+  repository: https://gh_token@github.com/ihuanglei/ihuanglei.github.com.git
+  branch: master
