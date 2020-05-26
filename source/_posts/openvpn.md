@@ -208,4 +208,4 @@ mute 20
 
 [下载地址](https://github.com/OpenVPN/openvpn-gui/releases)
 
-安装到导入配置文件
+安装好后导入配置文件
