@@ -5,15 +5,6 @@ tags:
 categories: golang
 ---
 
-第一次我来测试一下，ci自动发布功能,
 
-继续来看看
-
-```java
-
-public void main(String[] args){
-    System.out.println("hello world!");
-
-}
 
 ```
