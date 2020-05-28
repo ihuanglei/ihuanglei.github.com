@@ -4,17 +4,19 @@ date: 2020-05-26 10:19:10
 tags:
 ---
 
-> 注意：本教程在centos7下操作
+> 注意：本教程在 centos7 下操作
+
+### 依赖软件
 
 - 软件版本
 
 ```
-openvpn 2.4.9 
+openvpn 2.4.9
 easy-rsa 3.0.7
 
-如果版本不一致，后面的路径会有所差别 
+如果版本不一致，后面的路径会有所差别
 
- ```
+```
 
 - 安装扩展源
 
@@ -22,7 +24,7 @@ easy-rsa 3.0.7
     yum install epel-release -y
 ```
 
-- 安装openvpn easy-rsa3
+- 安装 openvpn easy-rsa3
 
 ```Shell
     yum install openvpn easy-rsa -y
@@ -49,19 +51,19 @@ cp /usr/share/doc/easy-rsa-3.0.7/vars.example /etc/openvpn/easy-rsa/3/vars
 这里的easy-rsa版本如果不一致，请注意路径
 ```
 
-- 进入easy-rsa目录
+- 进入 easy-rsa 目录
 
 ```Shell
     cd /etc/openvpn/easy-rsa/3
 ```
 
-- 创建空PKI
+- 创建空 PKI
 
 ```Shell
 ./easyrsa init-pki
 ```
 
-- 创建CA证书(不使用密码)
+- 创建 CA 证书(不使用密码)
 
 ```Shell
 ./easyrsa build-ca nopass
@@ -81,7 +83,7 @@ cp /usr/share/doc/easy-rsa-3.0.7/vars.example /etc/openvpn/easy-rsa/3/vars
 ./easyrsa sign server server
 ```
 
-- 创建Diffie-Hellman
+- 创建 Diffie-Hellman
 
 ```Shell
 ./easyrsa gen-dh
@@ -91,7 +93,7 @@ cp /usr/share/doc/easy-rsa-3.0.7/vars.example /etc/openvpn/easy-rsa/3/vars
 
 ```Shell
 mkdir /etc/openvpn/server/certs
-cp /etc/openvpn/easy-rsa/3/pki/dh.pem /etc/openvpn/server/certs        
+cp /etc/openvpn/easy-rsa/3/pki/dh.pem /etc/openvpn/server/certs
 cp /etc/openvpn/easy-rsa/3/pki/ca.crt /etc/openvpn/server/certs
 cp /etc/openvpn/easy-rsa/3/pki/issued/server.crt /etc/openvpn/server/certs
 cp /etc/openvpn/easy-rsa/3/pki/private/server.key /etc/openvpn/server/certs
@@ -104,6 +106,7 @@ vim /etc/openvpn/server/server.conf
 ```
 
 需修改项如下:
+
 ```
 local 192.168.10.155 # 当前服务器ip地址，请修改
 
@@ -135,7 +138,7 @@ group openvpn　＃ 去掉前面的;修改运行用户组
 
 ```
 
-- 启动openvpn服务
+- 启动 openvpn 服务
 
 ```Shell
 systemctl start openvpn-server@server.service
@@ -204,7 +207,7 @@ mute 20
 ./easyrsa sign client test
 ```
 
-- 安装openvpn client
+- 安装 openvpn client
 
 [下载地址](https://github.com/OpenVPN/openvpn-gui/releases)
 
