@@ -164,7 +164,7 @@ cp /usr/share/doc/openvpn-2.4.9/sample/sample-config-files/client.conf /etc/open
 
 - 修改配置文件
 
-```Shell
+```
 # 没有用的都可以删除了，留以下内容
 
 client
