@@ -2,6 +2,7 @@
 title: Openvpn 内网互通
 date: 2020-05-28 09:28:35
 tags:
+categories: vpn
 ---
 
 > 先说一个具体的场景：

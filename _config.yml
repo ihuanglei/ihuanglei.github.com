@@ -101,3 +101,7 @@ deploy:
   type: git
   repository: https://gh_token@github.com/ihuanglei/ihuanglei.github.com.git
   branch: master
+
+search:
+  path: search.xml
+  field: all

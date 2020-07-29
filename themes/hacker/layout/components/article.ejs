@@ -1,17 +1,17 @@
 <article>
 
   <% if (item.link){ %>
-    <% if (item.title){ %>
-    <h3 class="article-title"><a href="<%- item.link %>" target="_blank"><span><%= item.title %></span></a></h3>
-    <% } else { %>
-    <h3 class="article-title"><a href="<%- item.link %>" target="_blank"><span><%= item.link %></span></a></h3>
-    <% } %>
+  <% if (item.title){ %>
+  <h3 class="article-title"><a href="<%- item.link %>" target="_blank"><span><%= item.title %></span></a></h3>
   <% } else { %>
-    <% if (index){ %>
-    <h3 class="article-title"><a href="<%- config.root %><%- item.path %>"><span><%= item.title %></span></a></h3>
-    <% } else { %>
-    <h3 class="article-title"><span><%= item.title %></span></h3>
-    <% } %>
+  <h3 class="article-title"><a href="<%- item.link %>" target="_blank"><span><%= item.link %></span></a></h3>
+  <% } %>
+  <% } else { %>
+  <% if (index){ %>
+  <h3 class="article-title"><a href="<%- config.root %><%- item.path %>"><span><%= item.title %></span></a></h3>
+  <% } else { %>
+  <h3 class="article-title"><span><%= item.title %></span></h3>
+  <% } %>
   <% } %>
 
   <div class="article-top-meta">
@@ -42,12 +42,12 @@
   <div class="article-content">
     <div class="entry">
       <% if (item.excerpt && index){ %>
-        <%- item.excerpt %>
-        <% if (theme.read_more_btn){ %>
-          <p><a class="excerpt-btn" href="<%- item.path %>"><span><%- __('read_more') %></span></a></p>
-        <% } %>
+      <%- item.excerpt %>
+      <% if (theme.read_more_btn){ %>
+      <p><a class="excerpt-btn" href="<%- item.path %>"><span><%- __('read_more') %></span></a></p>
+      <% } %>
       <% } else { %>
-        <%- item.content %>
+      <%- item.content %>
       <% } %>
     </div>
 
@@ -56,7 +56,7 @@
   <div class="article-footer">
     <div class="article-meta pull-left">
 
-    <% if (item.categories && item.categories.length){ %>
+      <% if (item.categories && item.categories.length){ %>
       <%
         var cats = [];
         item.categories.forEach(function(cat){
@@ -64,25 +64,25 @@
         });
       %>
 
-    <span class="post-categories">
-      <i class="icon-categories"></i>
+      <span class="post-categories">
+        <i class="icon-categories"></i>
         <%- cats.join(', ') %>
-    </span>
-    <% } %>
+      </span>
+      <% } %>
 
-    <% if (item.tags && item.tags.length){ %>
-    <%
+      <% if (item.tags && item.tags.length){ %>
+      <%
         var tags = [];
         item.tags.forEach(function(tag){
             tags.push('<a href="' + config.root + tag.path + '">' + tag.name + '</a>');
         });
     %>
 
-    <span class="post-tags">
-      <i class="icon-tags"></i>
+      <span class="post-tags">
+        <i class="icon-tags"></i>
         <%- tags.join('') %>
-    </span>
-    <% } %>
+      </span>
+      <% } %>
 
     </div>
 
@@ -100,4 +100,19 @@
 </article>
 <% if (!index) { %>
   <%- partial('comment') %>
+
+  <script>
+    (function () {
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js'
+      } else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js'
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s)
+    })();
+  </script>
+
 <% } %>

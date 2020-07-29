@@ -1,7 +1,7 @@
 menu:
   Home: /
   GoLang: /categories/golang/
-  Tools: http://tools.huanglei.org
+  Tools: https://huanglei.org/chrome-rabbit/dist
   GitHub: https://github.com/ihuanglei
 
 # gitment
@@ -33,3 +33,6 @@ googleTrackId:
 
 # whether to show read more button when showing article in excerpt in main page
 read_more: false
+
+# baidu analytics
+baidu_analytics: 9f876c77a5ba35ad24ed7e32df74db58

@@ -2,6 +2,7 @@
 title: Centos配置
 date: 2020-05-08 13:05:37
 tags:
+categories: os
 ---
 
 ## Centos 安装好后初始化

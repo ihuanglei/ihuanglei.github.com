@@ -2,6 +2,7 @@
 title: Openvpn 配置
 date: 2020-05-26 10:19:10
 tags:
+categories: vpn
 ---
 
 > 注意：本教程在 centos7 下操作
