@@ -57,6 +57,7 @@ persist-key
 persist-tun
 status openvpn-status.log
 log-append  openvpn.log
+comp-lzo
 verb 3
 mute 20
 ```
