@@ -185,6 +185,7 @@ key client.key     #
 
 remote-cert-tls server
 cipher AES-256-CBC
+comp-lzo
 verb 3
 mute 20
 ```
