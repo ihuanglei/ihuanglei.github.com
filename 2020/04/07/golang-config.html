@@ -1,0 +1,181 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Golang配置 | huanglei | long long ago</title>
+
+  
+  <meta name="author" content="huanglei">
+  
+
+  
+  <meta name="description" content="简单就好">
+  
+
+  
+  <meta name="keywords" content="开发　技术 架构师 运维 java go golang python vpn typescript javascript">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="Golang配置"/>
+
+  <meta property="og:site_name" content="huanglei"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="huanglei" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">huanglei</a>
+    </h1>
+    <p class="site-description">long long ago</p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/categories/golang/">GO</a></li>
+      
+        <li><a href="/categories/compile/">Compiler</a></li>
+      
+        <li><a href="https://huanglei.org/chrome-rabbit/dist" target="_blank" rel="noopener">Tool</a></li>
+      
+        <li><a href="https://github.com/ihuanglei" target="_blank" rel="noopener">Github</a></li>
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+  
+  <h3 class="article-title"><span>Golang配置</span></h3>
+  
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2020/04/07/golang-config.html" rel="bookmark">
+        <time class="entry-date published" datetime="2020-04-07T05:46:37.000Z">
+          2020-04-07
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+      <blockquote>
+<p>首先下载编译器，因为要翻墙，所以找个国内的地址。 根据你的操作系统，选择最新的一个版本，直接下载一个免安装的包 下载，下载完后解压到某个目录</p>
+</blockquote>
+<ul>
+<li>mac系统：gox.x.x.darwin-amd64.tar.gz</li>
+<li>linux系统：gox.x.x.linux-arm64.tar.gz</li>
+<li>window系统：gox.x.x.windows-amd64.zip</li>
+</ul>
+<h3 id="Mac-amp-amp-Linux"><a href="#Mac-amp-amp-Linux" class="headerlink" title="Mac &amp;&amp; Linux"></a>Mac &amp;&amp; Linux</h3><p>配置环境变量<br>vim ~/.bash_profile</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 设置GOROOT </span></span><br><span class="line">export GOROOT=/当前go解压的目录</span><br><span class="line"><span class="meta">#</span><span class="bash"> 设置GOPATH (新版本已不用设置，由于博主是从老版本过来的所以保留之前的) </span></span><br><span class="line">export GOPATH=/当前go工作的目录</span><br><span class="line"><span class="meta">#</span><span class="bash"> 因为google被禁了所以要设置代理 </span></span><br><span class="line">export GOPROXY=https://goproxy.io</span><br><span class="line"><span class="meta">#</span><span class="bash"> 使用go mod </span></span><br><span class="line">export GO111MODULE=on</span><br><span class="line">export PATH=$PATH:$GOROOT/bin:$GOPATH/bin</span><br></pre></td></tr></table></figure>
+
+<h3 id="Window"><a href="#Window" class="headerlink" title="Window"></a>Window</h3><p>配置环境变量 </p>
+<p>我的电脑-&gt;属性-&gt;环境变量-&gt;添加</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GOROOT: &#x2F;当前go解压的目录</span><br><span class="line"></span><br><span class="line">GOPATH: &#x2F;当前go工作的目录</span><br><span class="line"></span><br><span class="line">GOPROXY: https:&#x2F;&#x2F;goproxy.io</span><br><span class="line"></span><br><span class="line">GO111MODULE: on</span><br><span class="line"></span><br><span class="line">PATH: 最后添加;%GOROOT%&#x2F;bin:%GOPATH%&#x2F;bin</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">go env</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+      
+      
+
+      <span class="post-categories">
+        <i class="icon-categories"></i>
+        <a href="/categories/golang/">golang</a>
+      </span>
+      
+
+      
+
+    </div>
+
+    
+  </div>
+</article>
+
+  
+
+
+
+
+
+  <script>
+    (function () {
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js'
+      } else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js'
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s)
+    })();
+  </script>
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/CodeDaraW/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2020 huanglei
+    
+  </p>
+</footer>
+    
+<script>
+    var _hmt = _hmt || [];
+    (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?9f876c77a5ba35ad24ed7e32df74db58";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+  </div>
+</div>
+</body>
+</html>

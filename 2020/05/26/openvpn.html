@@ -1,0 +1,270 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Openvpn 配置 | huanglei | long long ago</title>
+
+  
+  <meta name="author" content="huanglei">
+  
+
+  
+  <meta name="description" content="简单就好">
+  
+
+  
+  <meta name="keywords" content="开发　技术 架构师 运维 java go golang python vpn typescript javascript">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="Openvpn 配置"/>
+
+  <meta property="og:site_name" content="huanglei"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="huanglei" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">huanglei</a>
+    </h1>
+    <p class="site-description">long long ago</p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/categories/golang/">GO</a></li>
+      
+        <li><a href="/categories/compile/">Compiler</a></li>
+      
+        <li><a href="https://huanglei.org/chrome-rabbit/dist" target="_blank" rel="noopener">Tool</a></li>
+      
+        <li><a href="https://github.com/ihuanglei" target="_blank" rel="noopener">Github</a></li>
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+  
+  <h3 class="article-title"><span>Openvpn 配置</span></h3>
+  
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2020/05/26/openvpn.html" rel="bookmark">
+        <time class="entry-date published" datetime="2020-05-26T02:19:10.000Z">
+          2020-05-26
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+      <blockquote>
+<p>注意：本教程在 centos7 下操作</p>
+</blockquote>
+<h3 id="依赖软件"><a href="#依赖软件" class="headerlink" title="依赖软件"></a>依赖软件</h3><ul>
+<li>软件版本</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">openvpn 2.4.9</span><br><span class="line">easy-rsa 3.0.7</span><br><span class="line"></span><br><span class="line">如果版本不一致，后面的路径会有所差别</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>安装扩展源</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">yum install epel-release -y</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>安装 openvpn easy-rsa3</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">yum install openvpn easy-rsa -y</span><br></pre></td></tr></table></figure>
+
+<h3 id="服务器配置"><a href="#服务器配置" class="headerlink" title="服务器配置"></a>服务器配置</h3><ul>
+<li>拷贝配置文件</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cp /usr/share/doc/openvpn-2.4.9/sample/sample-config-files/server.conf  /etc/openvpn/server/</span><br><span class="line"></span><br><span class="line">这里的openvpn版本如果不一致，请注意路径</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cp -r /usr/share/easy-rsa /etc/openvpn/</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cp /usr/share/doc/easy-rsa-3.0.7/vars.example /etc/openvpn/easy-rsa/3/vars</span><br><span class="line"></span><br><span class="line">这里的easy-rsa版本如果不一致，请注意路径</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>进入 easy-rsa 目录</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cd /etc/openvpn/easy-rsa/3</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>创建空 PKI</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">./easyrsa init-pki</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>创建 CA 证书(不使用密码)</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">./easyrsa build-ca nopass</span><br><span class="line"> (一路回车就可以)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>创建服务端证书(不使用密码)</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">./easyrsa gen-req server nopass</span><br><span class="line"> (一路回车就可以)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>签约服务端证书</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">./easyrsa sign server server</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>创建 Diffie-Hellman</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">./easyrsa gen-dh</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>整理服务器证书</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">mkdir /etc/openvpn/server/certs</span><br><span class="line">cp /etc/openvpn/easy-rsa/3/pki/dh.pem /etc/openvpn/server/certs</span><br><span class="line">cp /etc/openvpn/easy-rsa/3/pki/ca.crt /etc/openvpn/server/certs</span><br><span class="line">cp /etc/openvpn/easy-rsa/3/pki/issued/server.crt /etc/openvpn/server/certs</span><br><span class="line">cp /etc/openvpn/easy-rsa/3/pki/private/server.key /etc/openvpn/server/certs</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>服务器配置文件</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">vim /etc/openvpn/server/server.conf</span><br></pre></td></tr></table></figure>
+
+<p>需修改项如下:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">local 192.168.10.155 # 当前服务器ip地址，请修改</span><br><span class="line"></span><br><span class="line">proto tcp  # 去掉前面的;</span><br><span class="line">;proto udp # 前面加上;</span><br><span class="line"></span><br><span class="line">ca &#x2F;etc&#x2F;openvpn&#x2F;server&#x2F;certs&#x2F;ca.crt        # 修改路径</span><br><span class="line">cert &#x2F;etc&#x2F;openvpn&#x2F;server&#x2F;certs&#x2F;server.crt  #</span><br><span class="line">key &#x2F;etc&#x2F;openvpn&#x2F;server&#x2F;certs&#x2F;server.key   #</span><br><span class="line"></span><br><span class="line">dh &#x2F;etc&#x2F;openvpn&#x2F;server&#x2F;certs&#x2F;dh.pem        #</span><br><span class="line"></span><br><span class="line">ifconfig-pool-persist &#x2F;etc&#x2F;openvpn&#x2F;ipp.txt #</span><br><span class="line"></span><br><span class="line">client-to-client # 去掉前面的;</span><br><span class="line"></span><br><span class="line">comp-lzo # 去掉前面的;</span><br><span class="line"></span><br><span class="line">mute 20  # 去掉前面的;</span><br><span class="line"></span><br><span class="line">log-append openvpn.log # 去掉前面的;</span><br><span class="line"></span><br><span class="line">user openvpn # 去掉前面的;修改运行用户</span><br><span class="line">group openvpn　＃ 去掉前面的;修改运行用户组</span><br><span class="line"></span><br><span class="line">;explicit-exit-notify 1 # 前面加上;</span><br><span class="line"></span><br><span class="line">;tls-auth ta.key 0 # 前面加上;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>启动 openvpn 服务</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">systemctl start openvpn-server@server.service</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">查看启动状态</span><br><span class="line">systemctl status openvpn-server@server.service</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">添加到自启动</span><br><span class="line">systemctl enable openvpn-server@server.service</span><br></pre></td></tr></table></figure>
+
+<h3 id="客户端配置"><a href="#客户端配置" class="headerlink" title="客户端配置"></a>客户端配置</h3><ul>
+<li>客户端配置文件</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">cp /usr/share/doc/openvpn-2.4.9/sample/sample-config-files/client.conf /etc/openvpn/client/</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>修改配置文件</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 没有用的都可以删除了，留以下内容</span><br><span class="line"></span><br><span class="line">client</span><br><span class="line"></span><br><span class="line">dev tun</span><br><span class="line"></span><br><span class="line">proto tcp</span><br><span class="line">remote 192.168.10.155 1194  # 服务器ip地址和端口号，和服务端配置一致</span><br><span class="line">resolv-retry infinite</span><br><span class="line">nobind</span><br><span class="line">persist-key</span><br><span class="line">persist-tun</span><br><span class="line"></span><br><span class="line">ca ca.crt          # 修改配置文件路径</span><br><span class="line">cert client.crt    #</span><br><span class="line">key client.key     #</span><br><span class="line"></span><br><span class="line">remote-cert-tls server</span><br><span class="line">cipher AES-256-CBC</span><br><span class="line">comp-lzo</span><br><span class="line">verb 3</span><br><span class="line">mute 20</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>创建客户证书(不使用密码)</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">创建test用户</span><br><span class="line"></span><br><span class="line">./easyrsa gen-req test nopass</span><br><span class="line"> (一路回车就可以)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>签约客户证书</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">./easyrsa import-req /etc/openvpn/easy-rsa/3/pki/reqs/test.req test</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">./easyrsa sign client test</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>安装 openvpn client</li>
+</ul>
+<p><a href="https://github.com/OpenVPN/openvpn-gui/releases" target="_blank" rel="noopener">下载地址</a></p>
+<p>安装好后导入配置文件</p>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+      
+      
+
+      <span class="post-categories">
+        <i class="icon-categories"></i>
+        <a href="/categories/vpn/">vpn</a>
+      </span>
+      
+
+      
+
+    </div>
+
+    
+  </div>
+</article>
+
+  
+
+
+
+
+
+  <script>
+    (function () {
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js'
+      } else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js'
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s)
+    })();
+  </script>
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/CodeDaraW/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2020 huanglei
+    
+  </p>
+</footer>
+    
+<script>
+    var _hmt = _hmt || [];
+    (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?9f876c77a5ba35ad24ed7e32df74db58";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+  </div>
+</div>
+</body>
+</html>

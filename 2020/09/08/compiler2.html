@@ -1,0 +1,253 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>编译器 - 词法分析 | huanglei | long long ago</title>
+
+  
+  <meta name="author" content="huanglei">
+  
+
+  
+  <meta name="description" content="简单就好">
+  
+
+  
+  <meta name="keywords" content="开发　技术 架构师 运维 java go golang python vpn typescript javascript">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="编译器 - 词法分析"/>
+
+  <meta property="og:site_name" content="huanglei"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="huanglei" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">huanglei</a>
+    </h1>
+    <p class="site-description">long long ago</p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/categories/golang/">GO</a></li>
+      
+        <li><a href="/categories/compile/">Compiler</a></li>
+      
+        <li><a href="https://huanglei.org/chrome-rabbit/dist" target="_blank" rel="noopener">Tool</a></li>
+      
+        <li><a href="https://github.com/ihuanglei" target="_blank" rel="noopener">Github</a></li>
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+  
+  <h3 class="article-title"><span>编译器 - 词法分析</span></h3>
+  
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2020/09/08/compiler2.html" rel="bookmark">
+        <time class="entry-date published" datetime="2020-09-08T01:27:33.000Z">
+          2020-09-08
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+      <h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>词法分析器的功能：输入源程序，按照构词规则分解成一系列单词符号。单词是语言中具有独立意义的最小单位，包括关键字、标识符、运算符、界符和常量等</p>
+<ul>
+<li>关键字 是由程序语言定义的具有固定意义的标识符。例如，Java 中的if，while，for都是保留字</li>
+<li>标识符 用来表示各种名字，如变量名，数组名，过程名等等</li>
+<li>常数  常数的类型一般有整型、实型、布尔型、文字型等</li>
+<li>运算符 如+、-、*、/等等</li>
+<li>界符  如逗号、分号、括号、等等</li>
+</ul>
+<p>理论的知识还是比较复杂的，有状态转换图(FA)、正规式与正规集等，我的编译器系列文章是从开发人员的角度倒着来学习，先把算法过程捋一遍，然后再回过头去看理论知识，这样更容易理解理论说的是什么。</p>
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">这边的算法是从go中text&#x2F;scanner包中的Scanner移植过来的，去掉了unicode的支持，做了一点简化。</span><br><span class="line">我们主要是为了理解整个过程，所以有些严禁的东西都去掉了。</span><br></pre></td></tr></table></figure>
+
+<p>一. 简介</p>
+<ul>
+<li>整个算法用了两个缓存区（源数据缓冲区和词法单元临时缓冲区）</li>
+<li>三个指针，分别指向当前源数据缓存区位置和词法单元的开始位置及结束位置</li>
+<li>当前读取的字符的变量</li>
+<li>当前读取的行和列变量</li>
+<li>判断数字、字符、标识符的方法</li>
+<li>处理数字、字符串、标识符、注释的方法</li>
+</ul>
+<p>二. 文法</p>
+<ol>
+<li><p>字符</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">正则表达式: a-z | A-Z</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>数字</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">正则表达式: 0-9</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>标识符</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">以字符(a-zA-Z)或下划线(_)开头，后面只包含任意个字符、数字、下划线(a-zA-Z0-9_)的字符串</span><br><span class="line">正则表达式: [a-zA-Z_]+[a-zA-Z0-9_]*</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>数值</p>
+<ul>
+<li><p>整数或浮点数</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">以数字(0-9)开头，后面只包含一个小数点(.)和其他数字(0-9)的字符串</span><br><span class="line">正则表达式: [0-9]+\.?[0-9]*</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>浮点数</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">以小数点(.)开头，后面只包含其他数字的字符串</span><br><span class="line">正则表达式: \.[0-9]+</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>字符串</p>
+<ul>
+<li>单引号<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">以单引号(&#39;)开头,直到找到下一个单引号结束</span><br><span class="line">正则表达式: &#39;.*&#39;</span><br></pre></td></tr></table></figure></li>
+<li>双引号<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">以双引号(&quot;)开头,直到找到下一个双引号结束</span><br><span class="line">正则表达式: &quot;.*&quot;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>注释</p>
+<ul>
+<li><p>单行注释</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">以双反斜杠(&#x2F;&#x2F;)开头,直到当前行结束</span><br><span class="line">正则表达式: &#x2F;&#x2F;.*</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>多行注释或局部注释</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">以反斜杠(&#x2F;)和星号(*)开头，直到找到下一个反斜杠和星号结束</span><br><span class="line">正则表达式: &#x2F;\*.*\*&#x2F;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+</li>
+</ol>
+<p>三. 算法</p>
+<ol>
+<li><p>大体思路<br>首先获取整个字符流实例，读取到源数据缓存中，然后从源数据缓存中读取一个字符，判断是否符合文法规则和是否继续读取下一个字符，还是退出当前规则，重新开始。反复以上的过程直到字符流中的数据读完，算法很简单。</p>
+</li>
+<li><p>详细过程<br>先用文字给说明一下，再对照代码就明白了</p>
+<figure class="highlight golang"><table><tr><td class="code"><pre><span class="line">定义变量： </span><br><span class="line">	字符流实例</span><br><span class="line">	<span class="comment">//字符数组，长度为定义长度+1，为什么要+1后面解释</span></span><br><span class="line">	<span class="comment">//这里我们默认长度可以是1024，那数组的长度就是1024+1</span></span><br><span class="line">	<span class="comment">//当然也可以是其他长度2048+1等</span></span><br><span class="line">	源数据缓存</span><br><span class="line">	源数据缓存指针</span><br><span class="line">	<span class="comment">//动态字符数组，不确定长度</span></span><br><span class="line">	词法单元暂存缓存</span><br><span class="line">	词法单元指针开始，词法单元指针结束</span><br><span class="line">	当前行，列</span><br><span class="line">	当前读取的字符</span><br><span class="line"></span><br><span class="line">初始化：</span><br><span class="line">	<span class="number">1.</span>  打开文件或字符串到字符流实例</span><br><span class="line">	<span class="comment">//读取字符的时候如果读到0x80表示缓冲区没有可读字符或已经读完</span></span><br><span class="line">	<span class="comment">//需要从字符流中读取未读的字符</span></span><br><span class="line">	<span class="number">2.</span>  源数据缓存第一个字符为<span class="number">0x80</span></span><br><span class="line">	<span class="number">3.</span>  源数据缓存指针为<span class="number">0</span></span><br><span class="line">	<span class="comment">//只要有数据开始行肯定是1，当前列为0</span></span><br><span class="line">	<span class="number">4.</span>  当前行为<span class="number">1</span></span><br><span class="line">	<span class="number">5.</span>  当前列为<span class="number">0</span></span><br><span class="line">	<span class="comment">//默认没有读取任何字符，用-2来标记，后面用来判断</span></span><br><span class="line">	<span class="number">6.</span>  当前读取的字符为<span class="number">-2</span></span><br><span class="line">	<span class="comment">//词法单元暂存缓存也没有数据，指针开始置位-1，结束位置为0</span></span><br><span class="line">	<span class="number">7.</span>  词法单元指针开始为<span class="number">-1</span></span><br><span class="line">	<span class="number">8.</span>  词法单元指针结束<span class="number">0</span></span><br><span class="line"></span><br><span class="line">读取字符方法：</span><br><span class="line">	<span class="number">1.</span>  根据源数据缓存指针从源数据缓存中读取一个字符</span><br><span class="line">	<span class="number">2.</span>  如果读取的字符是<span class="number">0x80</span></span><br><span class="line">		<span class="comment">//这边有种情况</span></span><br><span class="line">		<span class="comment">//如果前面的处理正好符合某个规则，但是缓存中由于</span></span><br><span class="line">		<span class="comment">//长度的关系没有把完整的字符流中的数据读取进来，</span></span><br><span class="line">		<span class="comment">//所以必须先把之前处理的正确数据存起来</span></span><br><span class="line">		<span class="comment">//这也是这个词法单元暂存缓存的作用</span></span><br><span class="line">		<span class="number">3.</span>  如果词法单元指针开始大于等于<span class="number">0</span></span><br><span class="line">			<span class="number">4.</span>  把源数据缓存中词法单元指针开始到当前源数据缓存指针的数据存到词法单元暂存缓存</span><br><span class="line">			<span class="comment">//后面要重新读，长度位置都会变，所以重置</span></span><br><span class="line">			<span class="number">5.</span>  重置词法单元指针为<span class="number">0</span></span><br><span class="line">		<span class="comment">//表示还没有从字符流读取数据或源数据缓存已经读完</span></span><br><span class="line">		<span class="number">6.</span>  读取最多源数据缓存定义长度(<span class="number">1024</span>)个字符到源数据缓存</span><br><span class="line">		<span class="comment">//因为初始化的时候预留的1个字节</span></span><br><span class="line">		<span class="comment">//所以即使读取的数据长度为1024我们也可以在1025的位置定义标记0x80</span></span><br><span class="line">		<span class="comment">//为什么要标记0x80原因上面解释</span></span><br><span class="line">		<span class="comment">//如果读取的长度小于1024则只要在读取数据的后面加上0x80</span></span><br><span class="line">		<span class="number">7.</span>  源数据缓存中数据的后面一个字节设置为<span class="number">0x80</span></span><br><span class="line">		<span class="comment">//重新读取过数据所以源数据缓存指针必须重置</span></span><br><span class="line">		<span class="number">8.</span>  重置源数据缓存指针为<span class="number">0</span></span><br><span class="line">		<span class="number">9.</span>  如果字符流读取错误</span><br><span class="line">			<span class="number">10.</span> 如果数据读完出错返回EOF</span><br><span class="line">			<span class="number">11.</span> 否则输出错误信息</span><br><span class="line">		<span class="number">12.</span>  重新根据源数据缓存指针从源数据缓存的位置读取一个字符，也就是第<span class="number">0</span>个字符</span><br><span class="line">	<span class="comment">//当前位置已经读过，指针后移，当前列增加</span></span><br><span class="line">	<span class="number">13.</span>  缓存指针的位置+<span class="number">1</span></span><br><span class="line">	<span class="number">14.</span>  当前列+<span class="number">1</span></span><br><span class="line">	<span class="number">15.</span>  如果读取的字符为换行</span><br><span class="line">		<span class="comment">//表示新的一行开始</span></span><br><span class="line">		<span class="number">16.</span> 当前行+<span class="number">1</span></span><br><span class="line">		<span class="number">17.</span> 当前列<span class="number">0</span></span><br><span class="line">	<span class="number">18.</span> 返回读取的字符</span><br><span class="line"></span><br><span class="line">开始扫描：</span><br><span class="line">	<span class="number">1.</span>  获取当前读取的字符</span><br><span class="line">	<span class="comment">//重新扫描开始，词法单元指针为-1</span></span><br><span class="line">	<span class="comment">//保证在调用(读取字符方法)不会从词法单元暂存缓存获取数据</span></span><br><span class="line">	<span class="number">2.</span>  重置词法单元指针开始为<span class="number">-1</span></span><br><span class="line">	<span class="number">3.</span>  如果获取的字符是<span class="number">-2</span></span><br><span class="line">		<span class="comment">//表示刚开始读</span></span><br><span class="line">		<span class="number">4.</span> 调用(读取字符方法)重新获取</span><br><span class="line">	<span class="number">5.</span>  如果获取的字符是制表符(\t)、回车(\r)、换行(\n)、空字符串(<span class="string">' '</span>)</span><br><span class="line">		<span class="number">6.</span> 调用(读取字符方法)重新获取，直到不满足规则</span><br><span class="line">	<span class="comment">//读到了字符，因为获取字符以后指针往后移了，那当前字符的位置就要-1</span></span><br><span class="line">	<span class="comment">//最后我们会根据开始位置和结束位置来获取当前获取的词法单元内容</span></span><br><span class="line">	<span class="number">7.</span>  重置词法单元指针开始为源数据缓存指针<span class="number">-1</span></span><br><span class="line">	<span class="number">8.</span>  清空词法单元暂存缓存</span><br><span class="line">	<span class="comment">//因为有可能我们分析出来的字符在我们的规则中不存在</span></span><br><span class="line">	<span class="comment">//但是也必须要返回，所以这里暂时先这么设置</span></span><br><span class="line">	<span class="number">9.</span>  定义词法单元类型为获取的获取的字符</span><br><span class="line">	<span class="number">10.</span> 判断获取的字符</span><br><span class="line">		<span class="number">11.</span> 如果是EOF</span><br><span class="line">			<span class="comment">//源数据缓存已经处理完，同时字符流也没有数据，直接返回</span></span><br><span class="line">			<span class="number">12.</span> 返回</span><br><span class="line">		<span class="number">13.</span>  如果是字符</span><br><span class="line">			<span class="number">14.</span> 词法单元类型为标识符类型</span><br><span class="line">			<span class="number">15.</span> 调用(标识符处理方法)开始处理</span><br><span class="line">			<span class="number">16.</span> 更新获取的字符为返回处理完后返回的字符</span><br><span class="line">		<span class="number">17.</span> 如果是数字</span><br><span class="line">			<span class="number">18.</span> 调用(数值处理方法)开始处理</span><br><span class="line">			<span class="number">19.</span> 更新获取的字符为返回处理完后返回的字符</span><br><span class="line">			<span class="number">20.</span> 根据返回更新词法单元类型为整型或浮点型</span><br><span class="line">		<span class="number">21.</span> 如果是单引号(‘)或双引号(“)</span><br><span class="line">			<span class="number">22.</span> 词法单元类型为字符串类型</span><br><span class="line">			<span class="number">23.</span> 字符串处理方法开始处理</span><br><span class="line">			<span class="number">24.</span> 调用(读取字符方法)再次获取</span><br><span class="line">		<span class="number">25.</span> 如果是小数点(.)</span><br><span class="line">			<span class="comment">//因为不确定后面是不是数字，所以再获取一个</span></span><br><span class="line">			<span class="number">26.</span> 调用(读取字符方法)再次获取</span><br><span class="line">			<span class="number">27.</span> 如果是数字</span><br><span class="line">				<span class="comment">//因为有小数点一定是浮点数</span></span><br><span class="line">				<span class="number">28.</span> 词法单元类型为浮点型</span><br><span class="line">				<span class="number">29.</span> 调用(浮点数处理方法)开始处理</span><br><span class="line">				<span class="number">30.</span> 更新获取的字符为返回处理完后返回的字符</span><br><span class="line">		<span class="number">31.</span> 如果是反斜杠(/)</span><br><span class="line">			<span class="comment">// 因为不确定是不是注释，所以再获取一个</span></span><br><span class="line">			<span class="number">32.</span> 调用(读取字符方法)再次获取</span><br><span class="line">			<span class="number">33.</span> 如果是/或*</span><br><span class="line">				<span class="number">34.</span> 词法单元类型为注释</span><br><span class="line">				<span class="number">35.</span> 调用(注释处理方法)开始处理</span><br><span class="line">				<span class="number">36.</span> 更新获取的字符为返回处理完后返回的字符</span><br><span class="line">		<span class="number">37.</span> 如果都没有匹配到</span><br><span class="line">			<span class="number">38.</span> 调用(读取字符方法)更新获取的字符</span><br><span class="line">	<span class="comment">//原因通词法单元指针开始</span></span><br><span class="line">	<span class="number">39.</span> 词法单元指针结束为源数据缓存指针<span class="number">-1</span></span><br><span class="line">	<span class="number">40.</span> 更新当前读取的字符为获取的字符</span><br><span class="line">	<span class="number">41.</span> 返回词法单元类型</span><br><span class="line"></span><br><span class="line">文法处理方法：这边就不一一写出来了，后面代码中会有，比较简单</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h2 id="图解"><a href="#图解" class="headerlink" title="图解"></a>图解</h2><h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>代码用的是GO</p>
+<ol>
+<li><p>代码</p>
+ <figure class="highlight golang"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> lexer</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"bytes"</span></span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"io"</span></span><br><span class="line">	<span class="string">"os"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 缓存长度</span></span><br><span class="line"><span class="keyword">const</span> bufLen = <span class="number">1024</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 标识符</span></span><br><span class="line"><span class="keyword">const</span> readFlag = <span class="number">0x80</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 词法单元类型</span></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	EOF = <span class="number">1</span> &lt;&lt; <span class="literal">iota</span></span><br><span class="line">	Ident</span><br><span class="line">	Int</span><br><span class="line">	Float</span><br><span class="line">	String</span><br><span class="line">	Comment</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> tokenString = <span class="keyword">map</span>[<span class="keyword">rune</span>]<span class="keyword">string</span>&#123;</span><br><span class="line">	EOF:     <span class="string">"EOF"</span>,</span><br><span class="line">	Ident:   <span class="string">"Ident"</span>,</span><br><span class="line">	Int:     <span class="string">"Int"</span>,</span><br><span class="line">	Float:   <span class="string">"Float"</span>,</span><br><span class="line">	String:  <span class="string">"String"</span>,</span><br><span class="line">	Comment: <span class="string">"Comment"</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// TokenString 词法单元类型</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TokenString</span><span class="params">(token <span class="keyword">rune</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> s, found := tokenString[token]; found &#123;</span><br><span class="line">		<span class="keyword">return</span> s</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> fmt.Sprintf(<span class="string">"%q"</span>, <span class="keyword">string</span>(token))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Lexer 词法分析器</span></span><br><span class="line"><span class="keyword">type</span> Lexer <span class="keyword">struct</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 数据源</span></span><br><span class="line">	src io.Reader</span><br><span class="line">	<span class="comment">// 数据缓存区(bufLen字符),多一位为了下一次读取判断</span></span><br><span class="line">	srcBuf [bufLen + <span class="number">1</span>]<span class="keyword">byte</span></span><br><span class="line">	<span class="comment">// 当前读取位置</span></span><br><span class="line">	srcPos <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 词法临时缓存区</span></span><br><span class="line">	tokenBuf bytes.Buffer</span><br><span class="line">	<span class="comment">// 词法单元开始位置</span></span><br><span class="line">	tokenPos <span class="keyword">int</span></span><br><span class="line">	<span class="comment">// 词法单元结束位置</span></span><br><span class="line">	tokenEnd <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 当前读取的字符</span></span><br><span class="line">	ch <span class="keyword">rune</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 当前行</span></span><br><span class="line">	line <span class="keyword">int</span></span><br><span class="line">	<span class="comment">// 当前列</span></span><br><span class="line">	column <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line">	Filename <span class="keyword">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断字符</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isLetter</span><span class="params">(ch <span class="keyword">rune</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> (ch &gt;= <span class="string">'a'</span> &amp;&amp; ch &lt;= <span class="string">'z'</span>) || (ch &gt;= <span class="string">'A'</span> &amp;&amp; ch &lt;= <span class="string">'Z'</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断数字</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isDecimal</span><span class="params">(ch <span class="keyword">rune</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> ch &gt;= <span class="string">'0'</span> &amp;&amp; ch &lt;= <span class="string">'9'</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断标识符</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isIdentRune</span><span class="params">(ch <span class="keyword">rune</span>, i <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> ch == <span class="string">'_'</span> || isLetter(ch) || (isDecimal(ch) &amp;&amp; i &gt; <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 扫描标识符</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(lexer *Lexer)</span> <span class="title">scanIdentifier</span><span class="params">()</span> <span class="title">rune</span></span> &#123;</span><br><span class="line">	ch := lexer.next()</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">1</span>; isIdentRune(ch, i); i++ &#123;</span><br><span class="line">		ch = lexer.next()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> ch</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 扫描字符串</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(lexer *Lexer)</span> <span class="title">scanString</span><span class="params">(quote <span class="keyword">rune</span>)</span></span> &#123;</span><br><span class="line">	ch := lexer.next()</span><br><span class="line">	<span class="keyword">for</span> ch != quote &#123;</span><br><span class="line">		<span class="keyword">if</span> ch == <span class="string">'\n'</span> || ch &lt; <span class="number">0</span> &#123;</span><br><span class="line">			lexer.error(<span class="string">"literal not terminated"</span>)</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		ch = lexer.next()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 扫描数字</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(lexer *Lexer)</span> <span class="title">scanNumber</span><span class="params">(ch <span class="keyword">rune</span>, seenDot <span class="keyword">bool</span>)</span> <span class="params">(<span class="keyword">rune</span>, <span class="keyword">rune</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> tk <span class="keyword">rune</span></span><br><span class="line">	<span class="keyword">if</span> !seenDot &#123;</span><br><span class="line">		tk = Int</span><br><span class="line">		<span class="keyword">for</span> isDecimal(ch) &#123;</span><br><span class="line">			ch = lexer.next()</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> ch == <span class="string">'.'</span> &#123;</span><br><span class="line">			ch = lexer.next()</span><br><span class="line">			seenDot = <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 处理小数部分</span></span><br><span class="line">	<span class="keyword">if</span> seenDot &#123;</span><br><span class="line">		tk = Float</span><br><span class="line">		<span class="keyword">for</span> isDecimal(ch) &#123;</span><br><span class="line">			ch = lexer.next()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> tk, ch</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 扫描注释</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(lexer *Lexer)</span> <span class="title">scanComment</span><span class="params">(ch <span class="keyword">rune</span>)</span> <span class="title">rune</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> ch == <span class="string">'/'</span> &#123;</span><br><span class="line">		<span class="comment">// 单行注释</span></span><br><span class="line">		ch = lexer.next()</span><br><span class="line">		<span class="keyword">for</span> ch != <span class="string">'\n'</span> &amp;&amp; ch &gt;= <span class="number">0</span> &#123;</span><br><span class="line">			ch = lexer.next()</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> ch</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 非单行注释</span></span><br><span class="line">	ch = lexer.next()</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> ch &lt; <span class="number">0</span> &#123;</span><br><span class="line">			lexer.error(<span class="string">"comment not terminated"</span>)</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">		ch0 := ch</span><br><span class="line">		ch = lexer.next()</span><br><span class="line">		<span class="keyword">if</span> ch0 == <span class="string">'*'</span> &amp;&amp; ch == <span class="string">'/'</span> &#123;</span><br><span class="line">			ch = lexer.next()</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> ch</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(lexer *Lexer)</span> <span class="title">peek</span><span class="params">()</span> <span class="title">rune</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> lexer.ch == <span class="number">-2</span> &#123;</span><br><span class="line">		lexer.ch = lexer.next()</span><br><span class="line">		<span class="keyword">if</span> lexer.ch == <span class="string">'\uFEFF'</span> &#123;</span><br><span class="line">			lexer.ch = lexer.next() <span class="comment">// ignore BOM</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> lexer.ch</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取下一个字符</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(lexer *Lexer)</span> <span class="title">next</span><span class="params">()</span> <span class="title">rune</span></span> &#123;</span><br><span class="line">	ch := <span class="keyword">rune</span>(lexer.srcBuf[lexer.srcPos])</span><br><span class="line">	<span class="comment">// 如果是读取标记,则进行读取</span></span><br><span class="line">	<span class="keyword">if</span> ch &gt;= readFlag &#123;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 字符处理一半,缓存区已满，使用词法缓存暂存</span></span><br><span class="line">		<span class="keyword">if</span> lexer.tokenPos &gt;= <span class="number">0</span> &#123;</span><br><span class="line">			lexer.tokenBuf.Write(</span><br><span class="line">				lexer.srcBuf[lexer.tokenPos:lexer.srcPos]</span><br><span class="line">			)</span><br><span class="line">			lexer.tokenPos = <span class="number">0</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 从缓冲区中继续读取数据</span></span><br><span class="line">		n, err := lexer.src.Read(lexer.srcBuf[<span class="number">0</span>:bufLen])</span><br><span class="line">		<span class="comment">// 最后一位设置为下一次继续读取的标记</span></span><br><span class="line">		lexer.srcBuf[n] = readFlag</span><br><span class="line">		<span class="comment">// 重置当前读取位置</span></span><br><span class="line">		lexer.srcPos = <span class="number">0</span></span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="comment">// 其他错误则打印</span></span><br><span class="line">			<span class="keyword">if</span> err != io.EOF &#123;</span><br><span class="line">				lexer.error(err.Error())</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 如果已经读完返回End Of File</span></span><br><span class="line">			<span class="keyword">return</span> EOF</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 重新读取第一次字符</span></span><br><span class="line">		ch = <span class="keyword">rune</span>(lexer.srcBuf[lexer.srcPos])</span><br><span class="line">	&#125;</span><br><span class="line">	lexer.srcPos++</span><br><span class="line">	lexer.column++</span><br><span class="line">	<span class="keyword">switch</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> ch == <span class="string">'\n'</span>:</span><br><span class="line">		lexer.line++</span><br><span class="line">		lexer.column = <span class="number">0</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> ch</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 错误</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(lexer *Lexer)</span> <span class="title">error</span><span class="params">(msg <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">	fmt.Fprintf(os.Stderr, <span class="string">"%s: %s\n"</span>, lexer.Position(), msg)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Init 初始化</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(lexer *Lexer)</span> <span class="title">Init</span><span class="params">(src io.Reader)</span></span> &#123;</span><br><span class="line">	lexer.src = src</span><br><span class="line"></span><br><span class="line">	lexer.line = <span class="number">1</span></span><br><span class="line">	lexer.column = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">	lexer.srcBuf[<span class="number">0</span>] = readFlag</span><br><span class="line">	lexer.srcPos = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">	lexer.tokenPos = <span class="number">-1</span></span><br><span class="line">	lexer.tokenEnd = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">	lexer.ch = <span class="number">-2</span></span><br><span class="line"></span><br><span class="line">	lexer.Filename = <span class="string">"nofile"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Scan 扫描</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(lexer *Lexer)</span> <span class="title">Scan</span><span class="params">()</span> <span class="title">rune</span></span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 获取字符</span></span><br><span class="line">	ch := lexer.peek()</span><br><span class="line"></span><br><span class="line">	lexer.tokenPos = <span class="number">-1</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 忽略 制表符 回车换行 空字符串</span></span><br><span class="line">	<span class="keyword">for</span> ch == <span class="string">'\t'</span> || ch == <span class="string">'\n'</span> || ch == <span class="string">'\r'</span> || ch == <span class="string">' '</span> &#123;</span><br><span class="line">		ch = lexer.next()</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 清空词法缓存</span></span><br><span class="line">	lexer.tokenBuf.Reset()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 设置词法单元开始位置,因为next()中pos++，</span></span><br><span class="line">	<span class="comment">// 所以开始位置在缓存区中的位置往前移一格</span></span><br><span class="line">	lexer.tokenPos = lexer.srcPos - <span class="number">1</span></span><br><span class="line"></span><br><span class="line">	tk := ch</span><br><span class="line">	<span class="keyword">switch</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> isIdentRune(ch, <span class="number">0</span>):</span><br><span class="line">		<span class="comment">// 标识符</span></span><br><span class="line">		tk = Ident</span><br><span class="line">		ch = lexer.scanIdentifier()</span><br><span class="line">	<span class="keyword">case</span> isDecimal(ch):</span><br><span class="line">		<span class="comment">// 数值型,要判断是整数还是浮点数</span></span><br><span class="line">		tk, ch = lexer.scanNumber(ch, <span class="literal">false</span>)</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		<span class="keyword">switch</span> ch &#123;</span><br><span class="line">		<span class="keyword">case</span> EOF:</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		<span class="keyword">case</span> <span class="string">'"'</span>, <span class="string">'\''</span>:</span><br><span class="line">			lexer.scanString(ch)</span><br><span class="line">			tk = String</span><br><span class="line">			ch = lexer.next()</span><br><span class="line">		<span class="keyword">case</span> <span class="string">'/'</span>:</span><br><span class="line">			ch = lexer.next()</span><br><span class="line">			<span class="keyword">if</span> ch == <span class="string">'/'</span> || ch == <span class="string">'*'</span> &#123;</span><br><span class="line">				ch = lexer.scanComment(ch)</span><br><span class="line">				tk = Comment</span><br><span class="line">			&#125;</span><br><span class="line">		<span class="keyword">case</span> <span class="string">'.'</span>:</span><br><span class="line">			ch = lexer.next()</span><br><span class="line">			<span class="keyword">if</span> isDecimal(ch) &#123;</span><br><span class="line">				tk, ch = lexer.scanNumber(ch, <span class="literal">true</span>)</span><br><span class="line">			&#125;</span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">			ch = lexer.next()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 同样多读取了一个，所以把词法单位结束位置在缓存区中的位置往前移一格</span></span><br><span class="line">	lexer.tokenEnd = lexer.srcPos - <span class="number">1</span></span><br><span class="line">	lexer.ch = ch</span><br><span class="line">	<span class="keyword">return</span> tk</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Position 当前文件位置</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(lexer *Lexer)</span> <span class="title">Position</span><span class="params">()</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> line <span class="keyword">int</span></span><br><span class="line">	<span class="keyword">if</span> lexer.column &gt; <span class="number">0</span> &#123;</span><br><span class="line">		line = lexer.line</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="comment">// 如果读到\n，因为读取的时候已经加1了，所以这边减去1</span></span><br><span class="line">		line = lexer.line - <span class="number">1</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> fmt.Sprintf(<span class="string">"%s:%d:%d"</span>, lexer.Filename, line, lexer.column)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Token 词法单元</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(lexer *Lexer)</span> <span class="title">Token</span><span class="params">()</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> lexer.tokenPos &lt; <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">""</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> lexer.tokenEnd &lt; lexer.tokenPos &#123;</span><br><span class="line">		lexer.tokenEnd = lexer.tokenPos</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 词法单元缓存区为空，直接返回当前词法开始位置和结束位置的字符</span></span><br><span class="line">	<span class="keyword">if</span> lexer.tokenBuf.Len() == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">string</span>(lexer.srcBuf[lexer.tokenPos:lexer.tokenEnd])</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 把后面读取的缓冲区中的数据加入到词法单元的缓存区形成完整的字符</span></span><br><span class="line">	lexer.tokenBuf.Write(lexer.srcBuf[lexer.tokenPos:lexer.tokenEnd])</span><br><span class="line">	<span class="keyword">return</span> lexer.tokenBuf.String()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>代码基本和上面的文字描述一致</p>
+</li>
+<li><p>测试</p>
+ <figure class="highlight golang"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Test1</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">const</span> src = <span class="string">`</span></span><br><span class="line"><span class="string">	// Comment begins at column 5.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">This line should not be included in the output.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">/*</span></span><br><span class="line"><span class="string">This multiline comment</span></span><br><span class="line"><span class="string">should be extracted in</span></span><br><span class="line"><span class="string">its entirety.</span></span><br><span class="line"><span class="string">*/</span></span><br><span class="line"><span class="string">`</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> lexer Lexer</span><br><span class="line">	lexer.Init(strings.NewReader(src))</span><br><span class="line">	<span class="keyword">for</span> tok := lexer.Scan(); tok != EOF; tok = lexer.Scan() &#123;</span><br><span class="line">		fmt.Printf(<span class="string">"%s: %s %s\n"</span>, </span><br><span class="line">			lexer.Position(), lexer.Token(), TokenString(tok)</span><br><span class="line">		)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// nofile:2:0: // Comment begins at column 5. Comment</span></span><br><span class="line">	<span class="comment">// nofile:4:6: This Ident</span></span><br><span class="line">	<span class="comment">// nofile:4:11: line Ident</span></span><br><span class="line">	<span class="comment">// nofile:4:18: should Ident</span></span><br><span class="line">	<span class="comment">// nofile:4:22: not Ident</span></span><br><span class="line">	<span class="comment">// nofile:4:25: be Ident</span></span><br><span class="line">	<span class="comment">// nofile:4:34: included Ident</span></span><br><span class="line">	<span class="comment">// nofile:4:37: in Ident</span></span><br><span class="line">	<span class="comment">// nofile:4:41: the Ident</span></span><br><span class="line">	<span class="comment">// nofile:4:48: output Ident</span></span><br><span class="line">	<span class="comment">// nofile:4:0: . "."</span></span><br><span class="line">	<span class="comment">// nofile:10:0: /*</span></span><br><span class="line">	<span class="comment">// 	This multiline comment</span></span><br><span class="line">	<span class="comment">// 	should be extracted in</span></span><br><span class="line">	<span class="comment">// 	its entirety.</span></span><br><span class="line">	<span class="comment">// 	*/ Comment</span></span><br><span class="line">	<span class="comment">//</span></span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ol>
+<h2 id="再想想"><a href="#再想想" class="headerlink" title="再想想"></a>再想想</h2>
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+      
+      
+
+      <span class="post-categories">
+        <i class="icon-categories"></i>
+        <a href="/categories/compile/">compile</a>
+      </span>
+      
+
+      
+      
+
+      <span class="post-tags">
+        <i class="icon-tags"></i>
+        <a href="/tags/compile/">compile</a>
+      </span>
+      
+
+    </div>
+
+    
+  </div>
+</article>
+
+  
+
+
+
+
+
+  <script>
+    (function () {
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js'
+      } else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js'
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s)
+    })();
+  </script>
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/CodeDaraW/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2020 huanglei
+    
+  </p>
+</footer>
+    
+<script>
+    var _hmt = _hmt || [];
+    (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?9f876c77a5ba35ad24ed7e32df74db58";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+  </div>
+</div>
+</body>
+</html>
